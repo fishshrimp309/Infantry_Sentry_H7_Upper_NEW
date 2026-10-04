@@ -31,8 +31,8 @@ void Task_CANMotors_Callback()
 float base_yaw_vel_ff =  - chassis.move.real_vw*0;
 float yaw_mit[3]={0,1,0};
         #if MOTOR_ENABLE
-            // USER_CAN_SetMotorCurrent(&hfdcan2,0x1FF,gimbal.top_yaw.imuPID.output,0,0,0);
-            USER_CAN_SetMotorCurrent(&hfdcan2,0x1FF,vision_receive.yaw_acc*0.0707*16384/6,0,0,0);
+            USER_CAN_SetMotorCurrent(&hfdcan2,0x1FF,gimbal.top_yaw.imuPID.output,0,0,0);
+//            USER_CAN_SetMotorCurrent(&hfdcan2,0x1FF,vision_receive.yaw_acc*0.0707*16384/6,0,0,0);
             USER_CAN_SetMotorCurrent(&hfdcan1,0x200,shooter.triggerMotor.anglePID.output,shooter.fricMotor[0].speedPID.output,shooter.fricMotor[1].speedPID.output,0);
             // mit_ctrl(&hfdcan2,0x02,0,0,0,0,gimbal.pitch.imuPID.output);  //纯力矩控制
 //            mit_ctrl(&hfdcan2,0x01,0,gimbal.base_yaw.imuPID.outer.output+base_yaw_vel_ff,0.3,1,0);

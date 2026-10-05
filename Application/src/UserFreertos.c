@@ -37,6 +37,13 @@ void OS_ErrorCallback(void const * argument)
 			STOPFLAG = 1;						 
 			B2B_Transmit();
 		}
+		
+		if (rc_true_flag >= 100)
+		{
+			HAL_UARTEx_ReceiveToIdle_DMA(&huart5, usart5RxBuf, sizeof(usart5RxBuf));
+			__HAL_DMA_DISABLE_IT(&hdma_uart5_rx, DMA_IT_HT);
+		}
+		
 		if (rcInfo.right != 2 && rcInfo.right != 0)
 			HAL_NVIC_SystemReset(); // 右拨杆回到中间重启系统
 		//红灯闪烁    

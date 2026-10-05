@@ -3,7 +3,7 @@
 <title>Static Call Graph - [Infantry_Sentry_H7_Upper_CMake\Infantry_Sentry_H7_Upper_CMake.axf]</title></head>
 <body><HR>
 <H1>Static Call Graph for image Infantry_Sentry_H7_Upper_CMake\Infantry_Sentry_H7_Upper_CMake.axf</H1><HR>
-<BR><P>#&#060CALLGRAPH&#062# ARM Linker, 6230001: Last Updated: Sat Oct  3 23:21:53 2026
+<BR><P>#&#060CALLGRAPH&#062# ARM Linker, 6230001: Last Updated: Mon Oct  5 16:51:28 2026
 <BR><P>
 <H3>Maximum Stack Usage =       1072 bytes + Unknown(Functions without stacksize, Cycles, Untraceable Function Pointers)</H3><H3>
 Call chain for Maximum Stack Depth:</H3>
@@ -2667,6 +2667,7 @@ Global Symbols
 <LI><a href="#[49]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;USART1_IRQHandler
 <LI><a href="#[f9]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;B2B_Init
 <LI><a href="#[276]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;RC_Init
+<LI><a href="#[d0]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;OS_ErrorCallback
 <LI><a href="#[b5]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;Judge_UartLostCallback
 <LI><a href="#[d7]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;OS_RcCallback
 <LI><a href="#[20c]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;HAL_UARTEx_RxEventCallback
@@ -3246,11 +3247,12 @@ Global Symbols
 </UL>
 <BR>[Address Reference Count : 1]<UL><LI> freertos.o(.rodata..L__const.MX_FREERTOS_Init.os_thread_def_DetectTask)
 </UL>
-<P><STRONG><a name="[d0]"></a>OS_ErrorCallback</STRONG> (Thumb, 280 bytes, Stack size 48 bytes, userfreertos.o(.text.OS_ErrorCallback))
+<P><STRONG><a name="[d0]"></a>OS_ErrorCallback</STRONG> (Thumb, 740 bytes, Stack size 48 bytes, userfreertos.o(.text.OS_ErrorCallback))
 <BR><BR>[Stack]<UL><LI>Max Depth = 520 + Unknown Stack Size
 <LI>Call Chain = OS_ErrorCallback &rArr; disable_motor_mode &rArr; USER_CAN_Send &rArr; xTaskResumeAll &rArr; xTaskIncrementTick &rArr; SEGGER_SYSVIEW_OnTaskStartReady &rArr; _SendPacket &rArr; _CheckDownBuffer &rArr; _HandleIncomingPacket &rArr; SEGGER_SYSVIEW_Start &rArr; SEGGER_SYSVIEW_Start_Ex &rArr; _SendInitEvent &rArr; _SendPacket_Ex &rArr;  _CheckDownBuffer (Cycle)
 </UL>
 <BR>[Calls]<UL><LI><a href="#[161]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;HAL_Delay
+<LI><a href="#[fa]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;HAL_UARTEx_ReceiveToIdle_DMA
 <LI><a href="#[18f]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;HAL_NVIC_SystemReset
 <LI><a href="#[266]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;WS2812_Set
 <LI><a href="#[fd]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;B2B_Transmit
@@ -4957,7 +4959,7 @@ Global Symbols
 </UL>
 <BR>[Address Reference Count : 1]<UL><LI> vision.o(.data.vision_sensor)
 </UL>
-<P><STRONG><a name="[17]"></a>Vision_DataUpdate</STRONG> (Thumb, 284 bytes, Stack size 16 bytes, vision.o(.text.Vision_DataUpdate))
+<P><STRONG><a name="[17]"></a>Vision_DataUpdate</STRONG> (Thumb, 300 bytes, Stack size 16 bytes, vision.o(.text.Vision_DataUpdate))
 <BR><BR>[Stack]<UL><LI>Max Depth = 16<LI>Call Chain = Vision_DataUpdate
 </UL>
 <BR>[Calls]<UL><LI><a href="#[fc]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;__aeabi_memcpy

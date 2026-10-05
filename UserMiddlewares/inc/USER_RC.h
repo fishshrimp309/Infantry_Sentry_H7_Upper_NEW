@@ -320,5 +320,6 @@ extern DR16_RC_T rcInfo_DR16;
 extern ET08_RC_t rcInfo_ET08; 
 extern RC_TypeDef rcInfo;
 extern bool Rocker_Ctrl;
+extern int rc_true_flag;
 
 #endif

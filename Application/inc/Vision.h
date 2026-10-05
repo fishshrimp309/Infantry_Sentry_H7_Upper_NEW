@@ -130,7 +130,6 @@ typedef struct __attribute__((packed))
 	float diff_yaw;//大小yaw之间相差角度
 	float diff_yaw_chassis;//大yaw和底盘相差角度
   	float diff_pitch;//大小yaw之间pitch差值
-	float motor3508_speed[4]; //底盘每个电机转速
 	float bullet_speed;
 	uint8_t robo_status; //敌方机器人死没死
 	

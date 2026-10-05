@@ -173,9 +173,11 @@ void Gimbal_UpdateAngle()
 	}
 	gimbal.top_yaw.lastAngle = gimbal.top_yaw.angle;
 	gimbal.base_yaw.totalAngle = gimbal.top_yaw.totalAngle - yaw_delta_angle / 8192.0f * 360.0f;
-	#if SENTRY
+#if Sentry_Mode
 	visionFindAver = Filter_AverCalc(&gimbal.visionFilter.find, vision.tracking);
-	#endif
+#else
+	visionFindAver = Filter_AverCalc(&gimbal.visionFilter.find, vision.control);
+#endif
 }
 
 /*云台PID参数更新*/
@@ -235,12 +237,12 @@ void Gimbal_StateCtrl()
 			else
 				gimbal.scan_flag=false;
 
-			#if SENTRY
+#if Sentry_Mode
 			if(vision.fold_gimbal == 1)
 				gimbal.fold_flag = true;
 			else
-			#endif
 				gimbal.fold_flag = false;
+#endif
 			
 			if(gimbal.scan_flag&&gimbal.fold_flag  == false)
 			{
@@ -271,7 +273,11 @@ static void Gimbal_HandleVision(void)
 {
 	gimbal.visionEnable = true;
 	// shooter.fricOpenFlag = 0;
+#if Sentry_Mode
+	if(vision.tracking)
+#else
 	if(vision.control)
+#endif
 		Gimbal_VisionCtrl();
 	else
 	{
@@ -285,15 +291,17 @@ static void Gimbal_HandleVision(void)
 static void Gimbal_HandleScan(void)
 {
 	gimbal.visionEnable = true;
-#if SENTRY
+#if Sentry_Mode
 	if(vision.tracking)
+#else
+	if(vision.control)
+#endif
 	{
 		shooter.fricOpenFlag = 1;
 		Shooter_state(shooter.fricOpenFlag);
 		Gimbal_VisionCtrl();
 	}
 	else
-#endif
 	{
 		shooter.fricOpenFlag = 0;
 		Shooter_state(shooter.fricOpenFlag);
@@ -391,10 +399,15 @@ void Gimbal_VisionCtrl()
 	{
 		gimbal.base_yaw.targetAngle = gimbal.top_yaw.targetAngle;
 	}
+#if Sentry_Mode
+	gimbal.top_pitch.targetAngle = vision.pitch;
+#else
 	gimbal.top_pitch.targetAngle = vision.top_pitch;
+#endif
 	LIMIT(gimbal.top_pitch.targetAngle, gimbal.top_pitch.pitchMin, gimbal.top_pitch.pitchMax);
 }
-#if SENTRY
+
+#if Sentry_Mode
 void Gimbal_VisionCtrl_Limit()
 {
 	float target_top  = vision.top_yaw;

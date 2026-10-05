@@ -31,14 +31,28 @@ void Task_CANMotors_Callback()
 float base_yaw_vel_ff =  - chassis.move.real_vw*0;
 float yaw_mit[3]={0,1,0};
         #if MOTOR_ENABLE
+#if Sentry_Mode
             USER_CAN_SetMotorCurrent(&hfdcan2,0x1FF,gimbal.top_yaw.imuPID.output,0,0,0);
-//            USER_CAN_SetMotorCurrent(&hfdcan2,0x1FF,vision_receive.yaw_acc*0.0707*16384/6,0,0,0);
+            // mit_ctrl(&hfdcan2,0x03,0,gimbal.fold_pitch.imuPID.outer.output,0,1.5,gimbal.fold_pitch.imuPID.output); //mit速度环 自己写位置环 +力矩前馈
+            mit_ctrl(&hfdcan2,0x02,0,gimbal.top_pitch.imuPID.outer.output,0,1.5,gimbal.top_pitch.imuPID.output); //mit速度环 自己写位置环 +力矩前馈
+#else
+            if(vision.control && gimbal.visionEnable)
+            {
+                USER_CAN_SetMotorCurrent(&hfdcan2,0x1FF,vision_receive.yaw_acc*0.0707*16384/6,0,0,0);
+                mit_ctrl(&hfdcan2,0x02,0,0,0,0,-vision_receive.pitch_acc*0.00767642);
+            }
+            else
+            {
+                USER_CAN_SetMotorCurrent(&hfdcan2,0x1FF,gimbal.top_yaw.imuPID.output,0,0,0);
+           //     mit_ctrl(&hfdcan2,0x03,0,gimbal.fold_pitch.imuPID.outer.output,0,1.5,gimbal.fold_pitch.imuPID.output); //mit速度环 自己写位置环 +力矩前馈
+                mit_ctrl(&hfdcan2,0x02,0,gimbal.top_pitch.imuPID.outer.output,0,1.5,gimbal.top_pitch.imuPID.output); //mit速度环 自己写位置环 +力矩前馈
+            }
+#endif
+            mit_ctrl(&hfdcan2,0x03,0,gimbal.fold_pitch.imuPID.outer.output,0,1.5,gimbal.fold_pitch.imuPID.output); //mit速度环 自己写位置环 +力矩前馈
             USER_CAN_SetMotorCurrent(&hfdcan1,0x200,shooter.triggerMotor.anglePID.output,shooter.fricMotor[0].speedPID.output,shooter.fricMotor[1].speedPID.output,0);
             // mit_ctrl(&hfdcan2,0x02,0,0,0,0,gimbal.pitch.imuPID.output);  //纯力矩控制
 //            mit_ctrl(&hfdcan2,0x01,0,gimbal.base_yaw.imuPID.outer.output+base_yaw_vel_ff,0.3,1,0);
 			mit_ctrl(&hfdcan2,0x01,0,gimbal.base_yaw.imuPID.outer.output+base_yaw_vel_ff,yaw_mit[0],yaw_mit[1],yaw_mit[2]);
-            mit_ctrl(&hfdcan2,0x03,0,gimbal.fold_pitch.imuPID.outer.output,0,1.5,gimbal.fold_pitch.imuPID.output); //mit速度环 自己写位置环 +力矩前馈
-            mit_ctrl(&hfdcan2,0x02,0,gimbal.top_pitch.imuPID.outer.output,0,1.5,gimbal.top_pitch.imuPID.output); //mit速度环 自己写位置环 +力矩前馈
         #else
             USER_CAN_SetMotorCurrent(&hfdcan2,0x1FF,0,0,0,0);     
             USER_CAN_SetMotorCurrent(&hfdcan1,0x200,0,0,0,0); // 关断电机  

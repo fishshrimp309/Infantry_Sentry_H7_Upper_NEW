@@ -13,7 +13,7 @@
 #define INIT_YAW_ANGLE 120.0f//-28.0f   //此处校准大yaw
 #define TOP_PITCH_OFFSET 3.0f//0.151818514f //此处校准pitch
 #define FOLD_PITCH_OFFSET -2.3f//-0.926492786f //此处校准fold_pitch 校准效果为 当fold_pitch竖直向上时 角度为90度-0.826492786 //目前无过0检测 需机械安装时避开0点
-// #define FOLD_PITCH_OFFSET 1.53913379f //此处校准fold_pitch
+// #define FOLD_PITCH_OFFSET 1.53 913379f //此处校准fold_pitch
 
 #define MASS_G 9.81f
 

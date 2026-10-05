@@ -9,14 +9,6 @@
 #define    VISION_FRAME_HEADER_TX  	0x5A
 #define    VISION_FRAME_HEADER_RX  	0xA5
 
-/* 哨兵自瞄/AI 协议开关（注意：和 USER_RC.h 里的 Sentry_Mode 不是一回事，这个只管视觉协议）
- * 0 = 当前使用步兵视觉协议：VisionReceive / Vision_Type 里的哨兵字段、以及 Vision.c 的对应解析
- *     都已经被注释掉，所以本工程里所有依赖这些字段的分支统一用 #if SENTRY 屏蔽。
- * 置 1 之前必须先恢复 Vision.h 里被注释的结构体字段 + Vision.c:158-210 的解析代码。 */
-#ifndef SENTRY
-#define SENTRY 0
-#endif
-
 #ifndef PI
 #define PI 3.14159265f
 #endif
@@ -57,6 +49,46 @@ typedef struct __attribute__((packed))
 typedef struct __attribute__((packed))
 {
   uint8_t header ;
+#if Sentry_Mode
+	float linear_x;
+	float linear_y;	 
+	float angular_z; //旋转速度
+	
+	
+	uint8_t tracking; //0表示没瞄到 1表示瞄到装甲板 2表示瞄到符
+	
+	float base_yaw;  //自瞄目标角度 单位°
+	float top_yaw;	 //自瞄目标角度 单位°
+	float pitch;
+	
+	float incident_yaw;//单位弧度 （目标角度和目前角度差值，用于火控）
+	float distance;//两车中心距离
+	float armor_radius;	//装甲板的物理半径
+
+	uint8_t rune_number;  //打符模式使用 变化就打弹 打一发后没变化 0.5秒后再打一发
+
+	uint8_t force_shoot;//检测到 强制开一发火 0是不开 1为开火
+
+	uint8_t fold_gimbal;//0表示不折叠 1表示折叠
+	
+/***********以下为ai传输内容***********/
+	
+	
+	float align_yaw; //和起伏路段对齐角度
+	float rune_yaw; //符的角度
+	float outpost_yaw; //前哨站的角度
+
+	uint8_t spin_mode;  //0为小陀螺开  1为小陀螺关
+	uint8_t sentry_mode; //1为进攻 2为防守 3为移动 默认为3
+	uint8_t armor_mode;  //0为打车 1打前哨 2为打符
+	uint8_t align_mode;  //是否对齐 0为不对齐 1为对齐装甲板
+	uint8_t energy_activation; //0为不激活 1为激活小符 2为激活大符 激活小还是大和比赛开始时间有关
+	uint8_t buy_life; 	//0为不买活 1为买活
+	uint8_t remote_buy_blood;	//0到1为远程买一次血 1到2为买一次 依此类推 
+	uint8_t remote_buy_bullet;  //0到1为远程买一次弹 1到2为买一次 依此类推
+	uint16_t buy_projectile; //哨兵要买多少发弹 开局为0 修改后烧饼在补血点就能兑换 只能单增 如0->100买100发 100->101买1发 依此类推
+	uint8_t end_frame;   
+#else
   //步兵模式下的自瞄数据
   uint8_t control;      // 自瞄是否控制云台 0 不控制 1 控制 //
   float fire_thres_yaw; // 火控阈值
@@ -71,50 +103,32 @@ typedef struct __attribute__((packed))
   float pitch_acc;
   uint32_t bullet_id; // 自增的子弹ID
   uint16_t checksum ;
-	
-//	float linear_x;
-//	float linear_y;	 
-//	float angular_z; //旋转速度
-//	
-//	
-//	uint8_t tracking; //0表示没瞄到 1表示瞄到装甲板 2表示瞄到符
-//	
-//	float base_yaw;  //自瞄目标角度 单位°
-//	float top_yaw;	 //自瞄目标角度 单位°
-//	float pitch;
-//	
-//	float incident_yaw;//单位弧度 （目标角度和目前角度差值，用于火控）
-//	float distance;//两车中心距离
-//	float armor_radius;	//装甲板的物理半径
-
-//	uint8_t rune_number;  //打符模式使用 变化就打弹 打一发后没变化 0.5秒后再打一发
-
-//	uint8_t force_shoot;//检测到 强制开一发火 0是不开 1为开火
-
-//	uint8_t fold_gimbal;//0表示不折叠 1表示折叠
-	
-/***********以下为ai传输内容***********/
-	
-	
-//	float align_yaw; //和起伏路段对齐角度
-//	float rune_yaw; //符的角度
-//	float outpost_yaw; //前哨站的角度
-
-//	uint8_t spin_mode;  //0为小陀螺开  1为小陀螺关
-//	uint8_t sentry_mode; //1为进攻 2为防守 3为移动 默认为3
-//	uint8_t armor_mode;  //0为打车 1打前哨 2为打符
-//	uint8_t align_mode;  //是否对齐 0为不对齐 1为对齐装甲板
-//	uint8_t energy_activation; //0为不激活 1为激活小符 2为激活大符 激活小还是大和比赛开始时间有关
-//	uint8_t buy_life; 	//0为不买活 1为买活
-//	uint8_t remote_buy_blood;	//0到1为远程买一次血 1到2为买一次 依此类推 
-//	uint8_t remote_buy_bullet;  //0到1为远程买一次弹 1到2为买一次 依此类推
-//	uint16_t buy_projectile; //哨兵要买多少发弹 开局为0 修改后烧饼在补血点就能兑换 只能单增 如0->100买100发 100->101买1发 依此类推
-//	uint8_t end_frame;   
+#endif
 
 }VisionReceive;
 
 typedef struct __attribute__((packed))
 {
+#if Sentry_Mode
+	uint8_t header;
+	uint8_t detect_color;  // 0-red 1-blue
+	uint8_t mode;  //0为打装甲板 1为打符
+	
+	float roll;
+	float pitch;
+	float top_yaw;
+	float diff_yaw;//大小yaw之间相差角度
+  	float diff_pitch;//大小yaw之间pitch差值
+	float motor3508_speed[4]; //底盘每个电机转速
+	float bullet_speed;
+	uint8_t robo_status; //敌方机器人死没死
+	
+
+	Judge_Data_e AI_Judge_data;
+	uint8_t see_enemy; //0表示没瞄到 1表示瞄到装甲板 2表示瞄到符
+	
+ 	uint8_t end_frame;   
+#else
 	//步兵模式下发送
 	uint8_t header;//0x5A
 	uint8_t task_mode;   // 当前自瞄模式 0 空闲 1 打装甲板 2 小符 3 大符
@@ -127,24 +141,7 @@ typedef struct __attribute__((packed))
 	float yaw_vel;
 	uint32_t bullet_id; // 打出子弹时刻返回的子弹ID（目前没用上）
 	uint16_t checksum ;
-//	uint8_t header;
-//	uint8_t detect_color;  // 0-red 1-blue
-//	uint8_t mode;  //0为打装甲板 1为打符
-//	
-//	float roll;
-//	float pitch;
-//	float top_yaw;
-//	float diff_yaw;//大小yaw之间相差角度
-//  	float diff_pitch;//大小yaw之间pitch差值
-//	float motor3508_speed[4]; //底盘每个电机转速
-//	float bullet_speed;
-//	uint8_t robo_status; //敌方机器人死没死
-//	
-
-//	Judge_Data_e AI_Judge_data;
-//	uint8_t see_enemy; //0表示没瞄到 1表示瞄到装甲板 2表示瞄到符
-//	
-// 	uint8_t end_frame;   
+#endif
 	//uint16_t checksum;
 }VisionTransmit;
 
@@ -168,7 +165,20 @@ typedef struct vision_sensor_struct {
 
 typedef struct
 {	
-	//步兵模式下发送
+#if Sentry_Mode
+	float base_yaw;
+	float top_yaw;
+	float pitch;
+	uint8_t mode;
+	uint8_t tracking;
+	float fire;
+	float v_yaw;
+	float distance;//两车中心距离
+	float distance_to_center;//云台中心到锁定装甲板中心距离
+	float yaw_slope;
+	float pitch_slope;
+	float fold_gimbal;
+#else
 	uint8_t control; // 自瞄是否控制云台 0 不控制 1 控制
 	float fire_thres_yaw; // 火控阈值
 	float fire_thres_pitch;
@@ -182,19 +192,7 @@ typedef struct
 	float top_pitch_acc;
 	uint32_t bullet_id; // 自增的子弹ID
 	uint16_t checksum ;
-//	uint8_t mode;
-//	float base_yaw;
-//	float top_yaw;
-//	float pitch;
-//	uint8_t mode;
-//	uint8_t tracking;
-//	float fire;
-//	float v_yaw;
-//	float distance;//两车中心距离
-//	float distance_to_center;//云台中心到锁定装甲板中心距离
-//	float yaw_slope;
-//	float pitch_slope;
-//	float fold_gimbal;
+#endif
 }Vision_Type;
 
 

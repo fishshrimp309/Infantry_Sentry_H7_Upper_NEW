@@ -139,12 +139,12 @@ void Chassis_StateCtrl()
             }
             break;
 				case Chassis_AI:
-						#if SENTRY
+#if Sentry_Mode
 						if(vision_receive.spin_mode)//AI确定模式
 								chassis.rotate.mode = ChassisMode_Spin;
 						else
-						#endif
 								chassis.rotate.mode = ChassisMode_Follow;
+#endif
         default:
             break;
     }

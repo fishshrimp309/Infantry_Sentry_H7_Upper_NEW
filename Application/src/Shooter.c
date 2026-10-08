@@ -14,7 +14,7 @@
 
 Shooter shooter;
 uint8_t shootMaxSpeed = 24;
-uint32_t t = 0; // 线性火控延时
+uint32_t t = 30; // 线性火控延时
 int8_t shootSpeed = -1;
 
 
@@ -24,7 +24,7 @@ void Shooter_InitPID(void);
 //射击系统初始化
 void Shooter_Init()
 {
-	shooter.fricSpd = 5800;					//
+	shooter.fricSpd = 5800*4/5;					//
 	Slope_Init(&shooter.fricSlope, 140, 0); // 摩擦轮斜坡
 	Shooter_InitPID();						// m初始化电机pid
 	Shooter_RegisterEvents();				// 注册事件

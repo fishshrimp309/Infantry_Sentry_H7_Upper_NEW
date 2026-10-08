@@ -173,7 +173,12 @@ void Gimbal_UpdateAngle()
 	}
 	gimbal.top_yaw.lastAngle = gimbal.top_yaw.angle;
 	gimbal.base_yaw.totalAngle = gimbal.top_yaw.totalAngle - yaw_delta_angle / 8192.0f * 360.0f;
-	visionFindAver = Filter_AverCalc(&gimbal.visionFilter.find, vision.tracking);
+	
+	#if Sentry_Mode
+		visionFindAver = Filter_AverCalc(&gimbal.visionFilter.find, vision.tracking);
+	#else
+		visionFindAver = Filter_AverCalc(&gimbal.visionFilter.find, vision.control);
+	#endif
 }
 
 /*云台PID参数更新*/
@@ -232,11 +237,13 @@ void Gimbal_StateCtrl()
 				gimbal.scan_flag=true;
 			else
 				gimbal.scan_flag=false;
-
-			if(vision.fold_gimbal == 1)
-				gimbal.fold_flag = true;
-			else
-				gimbal.fold_flag = false;
+			
+			#if Sentry_Mode
+				if(vision.fold_gimbal == 1)
+					gimbal.fold_flag = true;
+				else
+					gimbal.fold_flag = false;
+			#endif
 			
 			if(gimbal.scan_flag&&gimbal.fold_flag  == false)
 			{
@@ -267,34 +274,44 @@ static void Gimbal_HandleVision(void)
 {
 	gimbal.visionEnable = true;
 	// shooter.fricOpenFlag = 0;
-	if(vision.tracking)
-		Gimbal_VisionCtrl();
-	else
-	{
-		if(Rocker_Ctrl)
-			Gimbal_RockerCtrl();
+	
+	#if Sentry_Mode
+		if(vision.tracking)
+	#else
+		if(vision.control)
+	#endif
+	
+			Gimbal_VisionCtrl();
 		else
-			Gimbal_MouseCtrl();
-	}
+		{
+			if(Rocker_Ctrl)
+				Gimbal_RockerCtrl();
+			else
+				Gimbal_MouseCtrl();
+		}
 }
 
 static void Gimbal_HandleScan(void)
 {
 	gimbal.visionEnable = true;
-	if(vision.tracking)
-	{
-		shooter.fricOpenFlag = 1;
-		Shooter_state(shooter.fricOpenFlag);
-		Gimbal_VisionCtrl();
-	}
-	else
-	{
-		shooter.fricOpenFlag = 0;
-		Shooter_state(shooter.fricOpenFlag);
-		if(!gimbal.fold_flag){
-		Gimbal_ScanCtrl();
+	#if Sentry_Mode
+		if(vision.tracking)
+	#else
+		if(vision.control)
+	#endif
+		{
+			shooter.fricOpenFlag = 1;
+			Shooter_state(shooter.fricOpenFlag);
+			Gimbal_VisionCtrl();
 		}
-	}
+		else
+		{
+			shooter.fricOpenFlag = 0;
+			Shooter_state(shooter.fricOpenFlag);
+			if(!gimbal.fold_flag){
+			Gimbal_ScanCtrl();
+			}
+		}
 }
 
 /*******五种控制函数*********/
@@ -385,9 +402,17 @@ void Gimbal_VisionCtrl()
 	{
 		gimbal.base_yaw.targetAngle = gimbal.top_yaw.targetAngle;
 	}
-	gimbal.top_pitch.targetAngle = vision.pitch;
+	
+	#if Sentry_Mode
+		gimbal.top_pitch.targetAngle = vision.pitch;
+	#else
+		gimbal.top_pitch.targetAngle = vision.top_pitch;
+	#endif
+	
 	LIMIT(gimbal.top_pitch.targetAngle, gimbal.top_pitch.pitchMin, gimbal.top_pitch.pitchMax);
 }
+
+#if Sentry_Mode
 void Gimbal_VisionCtrl_Limit()
 {
 	float target_top  = vision.top_yaw;
@@ -417,6 +442,7 @@ void Gimbal_VisionCtrl_Limit()
 			gimbal.top_pitch.pitchMin,
 			gimbal.top_pitch.pitchMax);
 }
+#endif
 
 void Gimbal_ScanCtrl()
 {
@@ -496,6 +522,7 @@ void Task_Gimbal_Callback()
 	}
 
 	//计算小yaw电机输出
+
 	DEPID_CascadeCalc(&gimbal.top_yaw.imuPID,gimbal.top_yaw.targetAngle,gimbal.top_yaw.totalAngle,gimbal.top_yaw.gyro);
 	//MPC_DEPID_CascadeCalc(&gimbal.top_yaw.imuPID_MPC, gimbal.top_yaw.targetAngle, gimbal.top_yaw.totalAngle, gimbal.top_yaw.gyro, vision_receive.yaw_vel, vision_receive.yaw_acc);
 //		gimbal.top_yaw.imuPID.output = gimbal.top_yaw.imuPID_MPC.output;
@@ -504,7 +531,7 @@ void Task_Gimbal_Callback()
 //		DEPID_CascadeCalc(&gimbal.base_yaw.imuPID, gimbal.base_yaw.targetAngle, gimbal.base_yaw.totalAngle, gimbal.base_yaw.gyro);
 //		gimbal.base_yaw.imuPID.output = -gimbal.base_yaw.imuPID.output/1000.0f - 2.0f * (gimbal.top_yaw.imuPID.output / 30000.0f);// - forwardfeed(gimbal.base_yaw.imuPID.outer.output / 1000.0f);//因为电机倒置 所以输出反向 输出除一千让PID参数乘1000方便调参 再加入前馈
 	PID_SingleCalc(&gimbal.base_yaw.imuPID.outer,gimbal.base_yaw.targetAngle,gimbal.base_yaw.totalAngle);  //自己写位置环 速度环用mit的
-	gimbal.base_yaw.imuPID.outer.output = gimbal.base_yaw.imuPID.outer.output / 1000.0f;
+	gimbal.base_yaw.imuPID.outer.output = gimbal.base_yaw.imuPID.outer.output / 1000.0f - chassis.move.real_vw;//加上底盘自转前馈，抵消底盘转动给大yaw带来的影响
 
 	// 计算顶pitch电机输出
 	// DEPID_CascadeCalc(&gimbal.pitch.imuPID, gimbal.pitch.targetAngle, gimbal.pitch.angle, gimbal.pitch.gyro);

@@ -8,7 +8,7 @@
 #include "gimbal.h"
 #include "judge.h"
 
-#define MOTOR_ENABLE 1 // 1开电机 0关电机
+#define MOTOR_ENABLE 0 // 1开电机 0关电机
 
 void Motor_ClearErr(FDCAN_HandleTypeDef *hfdcan, uint8_t id, uint8_t state)
 {

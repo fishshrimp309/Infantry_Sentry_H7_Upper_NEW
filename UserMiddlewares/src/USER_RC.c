@@ -9,7 +9,6 @@
 #include <stdbool.h>
 #include "USER_Detcet.h"
 
-
 uint8_t usart5RxBuf[25]; // 串口5缓冲区
 MC6C_RC_t rcInfo_MC6C = {0};//三个遥控器各自的接口
 DR16_RC_T rcInfo_DR16 = {0};

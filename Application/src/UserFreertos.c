@@ -19,11 +19,11 @@ void OS_ErrorCallback(void const * argument)
 	//	B2B_Init();
 	osThreadSuspend(ErrorTaskHandle); //第一次执行挂起自身 
 	CLEAR_BIT(hfdcan1.Instance->CCCR, FDCAN_CCCR_INIT);
+	USER_CAN_SetMotorCurrent(&hfdcan2,0x1FF,0,0,0,0);//关断电机
 	disable_motor_mode(&hfdcan2,0x01,MIT_MODE);
 	disable_motor_mode(&hfdcan2,0x02,MIT_MODE);
 	disable_motor_mode(&hfdcan2,0x03,MIT_MODE);
-
-	USER_CAN_SetMotorCurrent(&hfdcan2,0x1FF,0,0,0,0);//关断电机
+	USER_CAN_SetMotorCurrent(&hfdcan1,0x200,0,0,0,0);
 	for(;;)
 	{
 	//B2B_Init();
@@ -31,6 +31,7 @@ void OS_ErrorCallback(void const * argument)
 		disable_motor_mode(&hfdcan2,0x01,MIT_MODE);
 		disable_motor_mode(&hfdcan2,0x02,MIT_MODE);
 		disable_motor_mode(&hfdcan2,0x03,MIT_MODE);
+		USER_CAN_SetMotorCurrent(&hfdcan1,0x200,0,0,0,0);
 		HAL_Delay(1);
 		if (FEEDBACK !=1)  //返回值不对  向下板发送停止信息
 		{

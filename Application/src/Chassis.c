@@ -67,7 +67,7 @@ void Chassis_InitPID()
     // PID_SetDeadzone(&chassis.rotate.pid, 0.1);变成手动死区
     // PID_Init(&chassis.move.real_xPID, 1, 0, 0, 0, 2000); // 15
     // PID_Init(&chassis.move.real_yPID, 1, 0, 0, 0, 2000); // 15
-    PID_Init(&chassis.move.real_wPID, 0, 0, 0, 0, 10); // 15
+    PID_Init(&chassis.move.real_wPID, 1.8, 0, 0, 0, 10); // 15
 }
 /**底盘云台关联角度更新**/
 void Chassis_UpdateAngle(void)
@@ -80,7 +80,7 @@ void Chassis_UpdateAngle(void)
     if(chassis.rotate.InitAngle < 0)
         chassis.rotate.InitAngle += 360;
 
-    uint16_t yaw_online = 1; //判断云台电机是否离线
+    uint16_t yaw_online = 0; //判断云台电机是否离线
     if(yaw_online == 1)
     {
         chassis.rotate.nowAngle = gimbal.base_yawMotor.nowAngle;
@@ -138,10 +138,12 @@ void Chassis_StateCtrl()
             }
             break;
 				case Chassis_AI:
+					#if Sentry_Mode
 						if(vision_receive.spin_mode)//AI确定模式
 								chassis.rotate.mode = ChassisMode_Spin;
 						else
 								chassis.rotate.mode = ChassisMode_Follow;
+					#endif
         default:
             break;
     }
@@ -420,6 +422,8 @@ void Task_Chassis_Callback()
     static float ctrl_vx, ctrl_vy, ctrl_vw;
     ctrl_vx = chassis.move.vx + chassis.move.real_xPID.output;
     ctrl_vy = chassis.move.vy + chassis.move.real_yPID.output;
+	if((ctrl_vx<0.03f && ctrl_vx> -0.03f) &&(ctrl_vy<0.03f&&ctrl_vy>-0.03f))
+		chassis.move.real_wPID.output = 0;
     ctrl_vw = chassis.move.vw + chassis.move.real_wPID.output;
 
     float wheel_v[4];

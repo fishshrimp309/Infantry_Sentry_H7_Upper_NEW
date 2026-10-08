@@ -12,7 +12,8 @@
 #define KEY_NUM 18
 #define MAX_KEY_CALLBACK_NUM 10
 
-#define Sentry_Mode 1
+#define Sentry_Mode 0//切换哨兵和步兵
+
 /*
  * Change USER_RC_TYPE to switch remote controller type.
  * Available values:

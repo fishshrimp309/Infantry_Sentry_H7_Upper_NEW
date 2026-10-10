@@ -28,7 +28,7 @@ void Task_CANMotors_Callback()
 		PID_SingleCalc(&shooter.fricMotor[1].speedPID,shooter.fricMotor[1].targetSpeed,shooter.fricMotor[1].speed);
 		Motor_CalcAngle(&shooter.triggerMotor);
 		PID_CascadeCalc(&shooter.triggerMotor.anglePID,shooter.triggerMotor.targetAngle,shooter.triggerMotor.totalAngle,shooter.triggerMotor.speed);
-float base_yaw_vel_ff =  - chassis.move.real_vw*0;
+float base_yaw_vel_ff =  - chassis.move.real_vw*1   ;
 float yaw_mit[3]={0,1,0};
         #if MOTOR_ENABLE
 #if Sentry_Mode

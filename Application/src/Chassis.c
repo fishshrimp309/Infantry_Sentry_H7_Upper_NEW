@@ -63,11 +63,11 @@ void Chassis_Init()
 
 void Chassis_InitPID()
 {
-	PID_Init(&chassis.rotate.pid, 0.2, 0,6, 4, 15); 
+	PID_Init(&chassis.rotate.pid, 0.32,0,0, 4, 10); 
     // PID_SetDeadzone(&chassis.rotate.pid, 0.1);变成手动死区
     // PID_Init(&chassis.move.real_xPID, 1, 0, 0, 0, 2000); // 15
     // PID_Init(&chassis.move.real_yPID, 1, 0, 0, 0, 2000); // 15
-    PID_Init(&chassis.move.real_wPID, 0, 0, 0, 0, 10); // 15
+    PID_Init(&chassis.move.real_wPID,1.8, 0,0, 0,12 ); // 15
 }
 /**底盘云台关联角度更新**/
 void Chassis_UpdateAngle(void)

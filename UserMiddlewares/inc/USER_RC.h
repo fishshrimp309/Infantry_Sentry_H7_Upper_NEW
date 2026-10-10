@@ -13,7 +13,7 @@
 #define MAX_KEY_CALLBACK_NUM 10
 
 #ifndef Sentry_Mode
-#define Sentry_Mode 1
+#define Sentry_Mode 0
 #endif
 /*
  * Change USER_RC_TYPE to switch remote controller type.

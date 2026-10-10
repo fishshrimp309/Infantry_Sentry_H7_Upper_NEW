@@ -116,6 +116,7 @@ typedef struct
 extern Gimbal_t gimbal;
 extern float p_target;
 extern float visionFindAver;
+extern float vision_ff[4];
 
 extern int16_t yaw_delta_angle;
 

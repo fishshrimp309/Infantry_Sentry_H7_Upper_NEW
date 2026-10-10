@@ -53,7 +53,7 @@ typedef struct __attribute__((packed))
 	float linear_x;
 	float linear_y;	 
 	float angular_z; //旋转速度
-	
+	uint8_t is_fold_gimbal;//0表示不折叠 1表示折叠
 	
 	uint8_t tracking; //0表示没瞄到 1表示瞄到装甲板 2表示瞄到符
 	
@@ -69,7 +69,7 @@ typedef struct __attribute__((packed))
 
 	uint8_t force_shoot;//检测到 强制开一发火 0是不开 1为开火
 
-	uint8_t fold_gimbal;//0表示不折叠 1表示折叠
+	
 	
 /***********以下为ai传输内容***********/
 	
@@ -178,7 +178,7 @@ typedef struct
 	float distance_to_center;//云台中心到锁定装甲板中心距离
 	float yaw_slope;
 	float pitch_slope;
-	float fold_gimbal;
+	float is_fold_gimbal;
 	#else
 	//步兵模式下发送
 	uint8_t control; // 自瞄是否控制云台 0 不控制 1 控制

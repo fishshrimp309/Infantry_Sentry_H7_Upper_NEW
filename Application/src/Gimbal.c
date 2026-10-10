@@ -238,13 +238,6 @@ void Gimbal_StateCtrl()
 			else
 				gimbal.scan_flag=false;
 			
-			#if Sentry_Mode
-				if(vision.fold_gimbal == 1)
-					gimbal.fold_flag = true;
-				else
-					gimbal.fold_flag = false;
-			#endif
-			
 			if(gimbal.scan_flag&&gimbal.fold_flag  == false)
 			{
 				gimbal.state = GimbalState_Scan;

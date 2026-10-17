@@ -14,7 +14,8 @@
 
 Shooter shooter;
 uint8_t shootMaxSpeed = 24;
-uint32_t t = 30; // 线性火控延时
+uint32_t t = 0; // 线性火控延时
+
 int8_t shootSpeed = -1;
 
 
@@ -256,10 +257,14 @@ void Task_Shooter_Callback()
 			over_speed++;
 			if(over_speed>=2)
 			{
+				float scale = 22.5f/shooter.bullet_speed;
 				over_speed=0;
 				shooter.fricSpd-=60;
 				shooter.fricMotor[0].targetSpeed+= 60;
 				shooter.fricMotor[1].targetSpeed-= 60;
+//				shooter.fricSpd*=scale;
+//				shooter.fricMotor[0].targetSpeed*=scale ;
+//				shooter.fricMotor[1].targetSpeed*=scale;
 				down_speed=0;
 			}
 		}
@@ -268,10 +273,14 @@ void Task_Shooter_Callback()
 			down_speed++;
 			if(down_speed>=4)
 			{
+				float scale = 21.5f/shooter.bullet_speed;
 				down_speed=0;
 				shooter.fricSpd+=50;
 				shooter.fricMotor[0].targetSpeed-= 50;
 				shooter.fricMotor[1].targetSpeed+= 50;
+//				shooter.fricSpd*=scale;
+//				shooter.fricMotor[0].targetSpeed*=scale ;
+//				shooter.fricMotor[1].targetSpeed*=scale;
 			}
 		}
 		

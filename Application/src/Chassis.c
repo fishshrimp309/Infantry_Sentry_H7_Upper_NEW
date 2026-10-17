@@ -11,7 +11,6 @@
 #include <stdbool.h>
 #include <stdint.h>
 
-
 int8_t diagonal_enable = 0;
 float vx,vy,vw = 0;  //AI传来的旋转速度
 float wheelvx[4];
@@ -21,10 +20,6 @@ uint16_t SET_WHEELSPEED_MAX = 8000;
 float targetangle[4];
 
 Chassis_t chassis = {0};
-
-float vx_test;
-float vy_test;
-float mode_test;
 
 /********************初始化************************/
 void Chassis_Init()
@@ -80,7 +75,7 @@ void Chassis_UpdateAngle(void)
     if(chassis.rotate.InitAngle < 0)
         chassis.rotate.InitAngle += 360;
 
-    uint16_t yaw_online = 0; //判断云台电机是否离线
+    uint16_t yaw_online = 1; //判断云台电机是否离线
     if(yaw_online == 1)
     {
         chassis.rotate.nowAngle = gimbal.base_yawMotor.nowAngle;

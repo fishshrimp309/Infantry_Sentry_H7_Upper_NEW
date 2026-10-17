@@ -53,8 +53,13 @@ typedef struct __attribute__((packed))
 	float linear_x;
 	float linear_y;	 
 	float angular_z; //旋转速度
+
 	uint8_t is_fold_gimbal;//0表示不折叠 1表示折叠
+	uint8_t is_aligning;//0表示不校准（跟随）， 1表示校准（跟随）
+	float yaw_offset_degree;
 	
+
+
 	uint8_t tracking; //0表示没瞄到 1表示瞄到装甲板 2表示瞄到符
 	
 	float base_yaw;  //自瞄目标角度 单位°
@@ -69,8 +74,6 @@ typedef struct __attribute__((packed))
 
 	uint8_t force_shoot;//检测到 强制开一发火 0是不开 1为开火
 
-	
-	
 /***********以下为ai传输内容***********/
 	
 	
@@ -142,7 +145,6 @@ typedef struct __attribute__((packed))
 	float yaw_vel;
 	uint32_t bullet_id; // 打出子弹时刻返回的子弹ID（目前没用上）
 	uint16_t checksum ;
-	//uint16_t checksum;
 	#endif
 }VisionTransmit;
 
@@ -178,7 +180,10 @@ typedef struct
 	float distance_to_center;//云台中心到锁定装甲板中心距离
 	float yaw_slope;
 	float pitch_slope;
+
 	float is_fold_gimbal;
+	uint8_t is_aligning;//0表示不校准（跟随）， 1表示校准（跟随）
+	float yaw_offset_degree;
 	#else
 	//步兵模式下发送
 	uint8_t control; // 自瞄是否控制云台 0 不控制 1 控制

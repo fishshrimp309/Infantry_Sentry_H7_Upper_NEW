@@ -134,6 +134,9 @@ void Vision_ParseData(void)
 {	
 	#if Sentry_Mode
 	vision.is_fold_gimbal = vision_receive.is_fold_gimbal;
+	vision.is_aligning = vision_receive.is_aligning;
+	vision.yaw_offset_degree = vision_receive.yaw_offset_degree;
+	
 	vision.pitch = vision_receive.pitch;
 	vision.base_yaw = vision_receive.base_yaw;
 	vision.top_yaw = vision_receive.top_yaw;
@@ -211,7 +214,7 @@ void Vision_ParseData(void)
 	vision.target_top_yaw = vision_receive.target_yaw;
 	vision.target_top_pitch = vision_receive.target_pitch;
 	vision.top_yaw = vision_receive.yaw/PI*180.0f;
-	vision.top_yaw_vel = vision_receive.yaw_vel;
+	vision.top_yaw_vel = vision_receive.yaw_vel; 
 	vision.top_yaw_acc = vision_receive.yaw_acc;
 	vision.top_pitch = vision_receive.pitch/PI*180.0f;
 	vision.top_pitch_vel = vision_receive.pitch_vel;

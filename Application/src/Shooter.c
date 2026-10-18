@@ -15,7 +15,6 @@
 Shooter shooter;
 uint8_t shootMaxSpeed = 24;
 uint32_t t = 0; // 线性火控延时
-
 int8_t shootSpeed = -1;
 
 

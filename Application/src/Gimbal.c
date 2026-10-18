@@ -23,6 +23,7 @@
 Gimbal_t gimbal;
 float visionFindAver;
 int16_t yaw_delta_angle;
+float vision_ff[4] = {0.0f, 0.0f, -0.3f, 0.00767642}; //视觉前馈系数 [0]yaw速度 [1]yaw加速度 [2]pitch速度 [3]pitch加速度 (0=不生效)
 
 void Gimbal_InitPID(void);
 
@@ -540,12 +541,12 @@ void Task_Gimbal_Callback()
 
 	//计算小yaw电机输出
 	DEPID_CascadeCalc(&gimbal.top_yaw.imuPID,gimbal.top_yaw.targetAngle,gimbal.top_yaw.totalAngle,gimbal.top_yaw.gyro);
-//		MPC_DEPID_CascadeCalc(&gimbal.top_yaw.imuPID_MPC, gimbal.top_yaw.targetAngle, gimbal.top_yaw.totalAngle, gimbal.top_yaw.gyro, vision_receive.yaw_vel, vision_receive.yaw_acc);
-//		gimbal.top_yaw.imuPID.output = gimbal.top_yaw.imuPID_MPC.output;
-	if(gimbal.visionEnable == true)
-	{
-		
+	if(vision.control && gimbal.visionEnable){ //仅自瞄时叠加视觉规划前馈
+		gimbal.top_yaw.imuPID.output += vision_ff[0]*vision.top_yaw_vel - 1.9f*gimbal.top_yaw.gyro;
+		LIMIT(gimbal.top_yaw.imuPID.output,-30000.0f,30000.0f); //防止叠加后超出int16不回绕
 	}
+//	MPC_DEPID_CascadeCalc(&gimbal.top_yaw.imuPID_MPC, gimbal.top_yaw.targetAngle, gimbal.top_yaw.totalAngle, gimbal.top_yaw.gyro, vision.top_yaw_vel, vision.top_yaw_acc);
+//		gimbal.top_yaw.imuPID.output = gimbal.top_yaw.imuPID_MPC.output;
 	
 	// 计算大yaw电机输出
 //		DEPID_CascadeCalc(&gimbal.base_yaw.imuPID, gimbal.base_yaw.targetAngle, gimbal.base_yaw.totalAngle, gimbal.base_yaw.gyro);
@@ -556,7 +557,15 @@ void Task_Gimbal_Callback()
 	// 计算顶pitch电机输出
 	// DEPID_CascadeCalc(&gimbal.pitch.imuPID, gimbal.pitch.targetAngle, gimbal.pitch.angle, gimbal.pitch.gyro);
 	PID_SingleCalc(&gimbal.top_pitch.imuPID.outer,gimbal.top_pitch.targetAngle,gimbal.top_pitch.angle);
-	gimbal.top_pitch.imuPID.output = - gimbal.top_pitch.imuPID.output/1000.0f - TOP_PITCH_DIRECTION * TOP_PITCH_MASS * MASS_G * TOP_PITCH_R * arm_cos_f32(gimbal.top_pitch.angle * PI / 180.0f); ////输出除一千让PID参数乘1000方便调参  同时加入前馈
+	float top_pitch_acc_ff = 0.0f;
+	if(vision.control && gimbal.visionEnable) //仅自瞄时叠加视觉规划前馈
+	{
+		gimbal.top_pitch.imuPID.outer.output += vision_ff[2]*vision.top_pitch_vel;
+		top_pitch_acc_ff = vision_ff[3]*vision.top_pitch_acc;
+	}
+	gimbal.top_pitch.imuPID.output = - gimbal.top_pitch.imuPID.output/1000.0f - TOP_PITCH_DIRECTION * TOP_PITCH_MASS * MASS_G * TOP_PITCH_R * arm_cos_f32(gimbal.top_pitch.angle * PI / 180.0f) - top_pitch_acc_ff; ////输出除一千让PID参数乘1000方便调参  同时加入前馈
+	     //PID_SingleCalc(&gimbal.top_pitch.imuPID.outer,gimbal.top_pitch.targetAngle,gimbal.top_pitch.angle);
+	     //gimbal.top_pitch.imuPID.output = - gimbal.top_pitch.imuPID.output/1000.0f - TOP_PITCH_DIRECTION * TOP_PITCH_MASS * MASS_G * TOP_PITCH_R * arm_cos_f32(gimbal.top_pitch.angle * PI / 180.0f); ////输出除一千让PID参数乘1000方便调参  同时加入前馈
 	//此处不是outer.output 方便从纯力矩切换到mit速度模式 同时加入前馈
 	// Gimbal_Follow_IMU();
 

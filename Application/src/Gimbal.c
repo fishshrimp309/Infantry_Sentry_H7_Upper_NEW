@@ -240,10 +240,12 @@ void Gimbal_StateCtrl()
 			else
 				gimbal.scan_flag=false;
 			
-			if(gimbal.scan_flag&&gimbal.fold_flag  == false)
+			if(gimbal.scan_flag&&gimbal.fold_flag  == false&&vision.is_fold_gimbal == 0)
 			{
 				gimbal.state = GimbalState_Scan;
 			}
+			else if(vision.is_aligning == 1 )//|| vision.is_fold_gimbal == 1
+				gimbal.state = GimbalState_Fold;//趴下对准过洞的状态
 			else
 				gimbal.state = GimbalState_Rocker;
 			break;
@@ -330,6 +332,22 @@ void Gimbal_RockerCtrl()
 			gimbal.fold_flag = true;
 		}
 	}
+
+	#if Sentry_Mode
+	if(chassis.pattern == Chassis_AI)
+	{
+		if((vision.is_fold_gimbal == 1 || vision.is_aligning == 1) && gimbal.fold_flag == true)
+		{
+			gimbal.fold_pitch.targetAngle = 0.0f;
+			gimbal.fold_flag = true;
+		}
+		if(vision.is_fold_gimbal == 1 && vision.is_aligning ==0 && gimbal.fold_flag == true)
+		{
+			gimbal.fold_pitch.targetAngle = 100.0f;
+			gimbal.fold_flag  = false;
+		}	
+	}
+	#endif
 
 	rcInfo.left_last = rcInfo.left;//叠史
 	// 小pitch限位：相对于fold_pitch的相对角度限制
@@ -532,9 +550,9 @@ void Task_Gimbal_Callback()
 		case GimbalState_Scan:
 			Gimbal_HandleScan();
 		break;
-		// case GimbalState_Fold:
-		// 	Gimbal_HandleFold();
-		// 	break;
+		case GimbalState_Fold:
+			Gimbal_HandleFold();
+			break;
 		default:
 			break;
 	}

@@ -78,13 +78,17 @@ void Chassis_UpdateAngle(void)
     uint16_t yaw_online = 1; //判断云台电机是否离线
     if(yaw_online == 1)
     {
-        chassis.rotate.nowAngle = gimbal.base_yawMotor.nowAngle;
-        chassis.rotate.relativeAngle = chassis.rotate.nowAngle - chassis.rotate.InitAngle;
+		chassis.rotate.nowAngle = gimbal.base_yawMotor.nowAngle;
+        float rel_angle_delta = chassis.rotate.nowAngle - chassis.rotate.InitAngle;  // 大yaw相对角(度)，过零保护
+        if (rel_angle_delta > 180.0f)       rel_angle_delta -= 360.0f;
+        else if (rel_angle_delta < -180.0f) rel_angle_delta += 360.0f;
+        chassis.rotate.relativeAngle = rel_angle_delta;
     }
     else
     {
         chassis.rotate.relativeAngle = 0;
     }
+	chassis.move.nowAngle = gimbal.base_yaw.angle - chassis.rotate.relativeAngle;
 }
 
 /*******模式状态机切换*********/
@@ -262,11 +266,8 @@ void Chassis_UpdateMove(void)
 		switch(chassis.pattern)
 		{
 		case Chassis_AI:
-			Slope_SetTarget(&chassis.move.xSlope, vx);
-			Slope_SetTarget(&chassis.move.ySlope, vy);
-			Chassis_UpdateSlope();
-			chassis.move.vx = Slope_GetVal(&chassis.move.xSlope);
-			chassis.move.vy = Slope_GetVal(&chassis.move.ySlope);
+			chassis.move.vx = -vy * gimbalAngleSin + (-vx) * gimbalAngleCos;//vy对应ai的x，接收时已经对换，vy是电控的前进
+            chassis.move.vy = vy * gimbalAngleCos + (-vx) * gimbalAngleSin;//云台往左转大yaw与底盘相对角为0到+180
 			break;
 		case Chassis_control:
 			
@@ -301,9 +302,12 @@ static void Chassis_HandleFollow(void) //底盘跟随模式
 {
     Slope_SetTarget(&chassis.move.spinSlope, 0);
     float angle;
-    if(chassis.pattern == Chassis_control)
-    {
-        angle = chassis.rotate.relativeAngle;
+	
+	if(chassis.pattern == Chassis_AI)
+	{
+		if( vision.is_aligning == 1)//vision.is_fold_gimbal == 1 ||
+		{
+			angle = chassis.rotate.relativeAngle;// +(gimbal.top_yawMotor.angle - TOP_YAW_OFFSET) / 8192.0f * 360.0f;
 			if(angle >= 180)
 					angle -= 360;
 			if(angle < -180)
@@ -330,6 +334,33 @@ static void Chassis_HandleFollow(void) //底盘跟随模式
 		else
 		{
 			chassis.move.vw = vw;
+			LIMIT(chassis.move.vw,-chassis.move.maxVw,chassis.move.maxVw);
+		}
+	}
+    if(chassis.pattern == Chassis_control)
+    {
+        angle = chassis.rotate.relativeAngle;
+			if(angle >= 180)
+					angle -= 360;
+			if(angle < -180)
+					angle += 360;
+			float deadzone = 0.1f;
+			float pid_angle = 0.0f;
+			if (angle > deadzone)
+			{
+					pid_angle = angle - deadzone;
+			}
+			else if (angle < -deadzone)
+			{
+					pid_angle = angle + deadzone;
+			}
+			else
+			{
+					pid_angle = 0.0f;
+					chassis.rotate.pid.integral = 0.0f;
+			}
+			PID_SingleCalc(&chassis.rotate.pid, 0, -pid_angle);
+			chassis.move.vw = chassis.rotate.pid.output + chassis.move.spinSlope.value;
 			LIMIT(chassis.move.vw,-chassis.move.maxVw,chassis.move.maxVw);
 		}
 }

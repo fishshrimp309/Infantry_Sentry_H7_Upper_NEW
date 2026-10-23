@@ -305,6 +305,7 @@ static void Chassis_HandleFollow(void) //底盘跟随模式
 	
 	if(chassis.pattern == Chassis_AI)
 	{
+		#if Sentry_Mode
 		if( vision.is_aligning == 1)//vision.is_fold_gimbal == 1 ||
 		{
 			angle = chassis.rotate.relativeAngle;// +(gimbal.top_yawMotor.angle - TOP_YAW_OFFSET) / 8192.0f * 360.0f;
@@ -332,6 +333,7 @@ static void Chassis_HandleFollow(void) //底盘跟随模式
 			LIMIT(chassis.move.vw,-chassis.move.maxVw,chassis.move.maxVw);
 		}
 		else
+		#endif
 		{
 			chassis.move.vw = vw;
 			LIMIT(chassis.move.vw,-chassis.move.maxVw,chassis.move.maxVw);

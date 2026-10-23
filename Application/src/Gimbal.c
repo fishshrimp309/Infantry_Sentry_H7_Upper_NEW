@@ -240,14 +240,17 @@ void Gimbal_StateCtrl()
 			else
 				gimbal.scan_flag=false;
 			
-			if(gimbal.scan_flag&&gimbal.fold_flag  == false&&vision.is_fold_gimbal == 0)
+			if(gimbal.scan_flag&&gimbal.fold_flag  == false)
 			{
-				gimbal.state = GimbalState_Scan;
+					gimbal.state = GimbalState_Scan;
 			}
-			else if(vision.is_aligning == 1 )//|| vision.is_fold_gimbal == 1
-				gimbal.state = GimbalState_Fold;//趴下对准过洞的状态
 			else
 				gimbal.state = GimbalState_Rocker;
+
+			#if Sentry_Mode
+			if(vision.is_aligning == 1 && vision.is_fold_gimbal == 1)//|| vision.is_fold_gimbal == 1
+				gimbal.state = GimbalState_Fold;//趴下对准过洞的状态
+			#endif
 			break;
 		default:
 			break;

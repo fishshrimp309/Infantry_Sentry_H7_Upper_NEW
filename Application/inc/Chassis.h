@@ -51,6 +51,7 @@ typedef struct _Chassis
 		float maxPower;
 		Slope xSlope, ySlope, outputSlope, chargeSlope, spinSlope; // 斜坡
 		uint8_t fastMode; // 快速模式
+		float nowAngle; // 当前底盘角度
 	} move;
 	
 	struct

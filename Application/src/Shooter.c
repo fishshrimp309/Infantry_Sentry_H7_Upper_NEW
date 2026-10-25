@@ -14,7 +14,7 @@
 
 Shooter shooter;
 uint8_t shootMaxSpeed = 24;
-uint32_t t = 0; // 线性火控延时
+uint32_t t = 40; // 线性火控延时
 int8_t shootSpeed = -1;
 
 
@@ -24,7 +24,7 @@ void Shooter_InitPID(void);
 //射击系统初始化
 void Shooter_Init()
 {
-	shooter.fricSpd = 5800;					//
+	shooter.fricSpd = 4640;					//
 	Slope_Init(&shooter.fricSlope, 140, 0); // 摩擦轮斜坡
 	Shooter_InitPID();						// m初始化电机pid
 	Shooter_RegisterEvents();				// 注册事件
@@ -37,7 +37,7 @@ void Shooter_InitPID()
 {
 	Motor_StartCalcAngle(&shooter.triggerMotor);							 // 初始化电机角度累计
 	PID_Init(&shooter.triggerMotor.anglePID.inner,3.5,0,0,7800,10000);
-	PID_Init(&shooter.triggerMotor.anglePID.outer, 0.5,0,0.01, 0, 6000);
+	PID_Init(&shooter.triggerMotor.anglePID.outer, 0.8,0,0.01, 0, 6000);
 
 	PID_Init(&shooter.fricMotor[0].speedPID, 25, 0, 5, 0, 16000); // 摩擦轮
 	PID_Init(&shooter.fricMotor[1].speedPID, 25, 0, 5, 0, 16000);

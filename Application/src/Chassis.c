@@ -420,6 +420,8 @@ void Task_Chassis_Callback()
     static float ctrl_vx, ctrl_vy, ctrl_vw;
     ctrl_vx = chassis.move.vx + chassis.move.real_xPID.output;
     ctrl_vy = chassis.move.vy + chassis.move.real_yPID.output;
+	if((ctrl_vx<0.03f && ctrl_vx> -0.03f) &&(ctrl_vy<0.03f&&ctrl_vy>-0.03f))
+		chassis.move.real_wPID.output = 0;
     ctrl_vw = chassis.move.vw + chassis.move.real_wPID.output;
 
     float wheel_v[4];

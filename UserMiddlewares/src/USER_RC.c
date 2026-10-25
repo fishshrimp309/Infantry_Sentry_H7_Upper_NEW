@@ -319,6 +319,8 @@ void HAL_UARTEx_RxEventCallback(UART_HandleTypeDef *huart, uint16_t Size)
 	{
 		B2B_Receive();
     Detect_Update(DeviceID_B2B);
+//		HAL_UARTEx_ReceiveToIdle_DMA(&huart2, usart2RxBuf, sizeof(usart2RxBuf));
+//		__HAL_DMA_DISABLE_IT(&hdma_usart2_rx, DMA_IT_HT);
 	}
 	if (huart == &huart5)
 	{
@@ -367,7 +369,7 @@ void RC_Register(uint32_t key, KeyCombineType combine, KeyEventType event, KeyCa
 				break;
 			case KeyEvent_OnDown:
 				keyList[index].onDownCb.combineKey[keyList[index].onDownCb.number] = combine;
-				keyList[index].onDownCb.func[keyList[index].onDownCb.number] = func;
+				keyList[index].onDownCb.func[keyList[index].onDownCb.number] = func; 
 				keyList[index].onDownCb.number++;
 				break;
 			case KeyEvent_OnUp:

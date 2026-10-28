@@ -268,7 +268,7 @@ static void Gimbal_HandleRocker(void)
 static void Gimbal_HandleFold(void)
 {
 	#if Sentry_Mode
-	Gimbal_FoldCtrl();
+	Gimbal_AiFoldCtrl();
 	#endif
 }
 
@@ -492,7 +492,7 @@ void Gimbal_ScanCtrl()
 }
 
 #if Sentry_Mode
-void Gimbal_FoldCtrl()//折叠过洞
+void Gimbal_AiFoldCtrl()//折叠过洞
 {
 	float yaw_offset_degree = vision.yaw_offset_degree * 0.001f;
 	LIMIT(yaw_offset_degree, -FOLD_YAW_OFFSET_LIMIT, FOLD_YAW_OFFSET_LIMIT);//偏移限幅，防止上位机跳变/野值引起猛摆
@@ -585,8 +585,6 @@ void Task_Gimbal_Callback()
 		top_pitch_acc_ff = vision_ff[3]*vision.top_pitch_acc;
 	}
 	gimbal.top_pitch.imuPID.output = - gimbal.top_pitch.imuPID.output/1000.0f - TOP_PITCH_DIRECTION * TOP_PITCH_MASS * MASS_G * TOP_PITCH_R * arm_cos_f32(gimbal.top_pitch.angle * PI / 180.0f) - top_pitch_acc_ff; ////输出除一千让PID参数乘1000方便调参  同时加入前馈
-	     //PID_SingleCalc(&gimbal.top_pitch.imuPID.outer,gimbal.top_pitch.targetAngle,gimbal.top_pitch.angle);
-	     //gimbal.top_pitch.imuPID.output = - gimbal.top_pitch.imuPID.output/1000.0f - TOP_PITCH_DIRECTION * TOP_PITCH_MASS * MASS_G * TOP_PITCH_R * arm_cos_f32(gimbal.top_pitch.angle * PI / 180.0f); ////输出除一千让PID参数乘1000方便调参  同时加入前馈
 	//此处不是outer.output 方便从纯力矩切换到mit速度模式 同时加入前馈
 	// Gimbal_Follow_IMU();
 

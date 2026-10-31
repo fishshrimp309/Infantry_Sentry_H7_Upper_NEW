@@ -13,6 +13,7 @@
 #include <math.h>
 #include <stdatomic.h>
 #include <stdbool.h>
+#include "USER_detcet.h"
 
 #define DEG_TO_RAD 0.01745329f  // PI / 180
 #define RAD_TO_DEG 57.2957795f  // 180 / PI

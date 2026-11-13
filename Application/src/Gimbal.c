@@ -39,7 +39,7 @@ void Gimbal_Init()
 	gimbal.top_pitch.targetAngle = gimbal.top_pitch.initAngle;
 
 	gimbal.fold_pitch.pitchMax = 95;
-	gimbal.fold_pitch.pitchMin = 5;
+	gimbal.fold_pitch.pitchMin = -0.5;
 
 	gimbal.fold_pitch.initAngle = 0;
 	gimbal.fold_pitch.targetAngle = gimbal.fold_pitch.initAngle;
@@ -142,7 +142,7 @@ void Gimbal_UpdateAngle()
 	{
 		// fold_pitch角度在0到-15度之间时，锁死角度为3度
 		gimbal.top_pitch.relativePitchMax = 93.0f;
-		gimbal.top_pitch.relativePitchMin = 90.0f;
+		gimbal.top_pitch.relativePitchMin = 87.0f;
 	}
 	else
 	{

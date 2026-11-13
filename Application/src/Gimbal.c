@@ -563,10 +563,7 @@ void Task_Gimbal_Callback()
 
 	//计算小yaw电机输出
 	DEPID_CascadeCalc(&gimbal.top_yaw.imuPID,gimbal.top_yaw.targetAngle,gimbal.top_yaw.totalAngle,gimbal.top_yaw.gyro);
-	if(vision.control && gimbal.visionEnable){ //仅自瞄时叠加视觉规划前馈
-		gimbal.top_yaw.imuPID.output += vision_ff[0]*vision.top_yaw_vel - 1.9f*gimbal.top_yaw.gyro;
-		LIMIT(gimbal.top_yaw.imuPID.output,-30000.0f,30000.0f); //防止叠加后超出int16不回绕
-	}
+
 //	MPC_DEPID_CascadeCalc(&gimbal.top_yaw.imuPID_MPC, gimbal.top_yaw.targetAngle, gimbal.top_yaw.totalAngle, gimbal.top_yaw.gyro, vision.top_yaw_vel, vision.top_yaw_acc);
 //		gimbal.top_yaw.imuPID.output = gimbal.top_yaw.imuPID_MPC.output;
 	
@@ -579,13 +576,7 @@ void Task_Gimbal_Callback()
 	// 计算顶pitch电机输出
 	// DEPID_CascadeCalc(&gimbal.pitch.imuPID, gimbal.pitch.targetAngle, gimbal.pitch.angle, gimbal.pitch.gyro);
 	PID_SingleCalc(&gimbal.top_pitch.imuPID.outer,gimbal.top_pitch.targetAngle,gimbal.top_pitch.angle);
-	float top_pitch_acc_ff = 0.0f;
-	if(vision.control && gimbal.visionEnable) //仅自瞄时叠加视觉规划前馈
-	{
-		gimbal.top_pitch.imuPID.outer.output += vision_ff[2]*vision.top_pitch_vel;
-		top_pitch_acc_ff = vision_ff[3]*vision.top_pitch_acc;
-	}
-	gimbal.top_pitch.imuPID.output = - gimbal.top_pitch.imuPID.output/1000.0f - TOP_PITCH_DIRECTION * TOP_PITCH_MASS * MASS_G * TOP_PITCH_R * arm_cos_f32(gimbal.top_pitch.angle * PI / 180.0f) - top_pitch_acc_ff; ////输出除一千让PID参数乘1000方便调参  同时加入前馈
+
 	//此处不是outer.output 方便从纯力矩切换到mit速度模式 同时加入前馈
 	// Gimbal_Follow_IMU();
 
@@ -595,6 +586,20 @@ void Task_Gimbal_Callback()
 	gimbal.fold_pitch.imuPID.output = - gimbal.fold_pitch.imuPID.outer.output / 1000.0f - FOLD_PITCH_DIRECTION * FOLD_PITCH_MASS * MASS_G * FOLD_PITCH_R * arm_cos_f32(gimbal.fold_pitch.IMU_angle * PI / 180.0f);
 	if(gimbal.fold_pitch.IMU_angle > 60.0f && gimbal.fold_pitch.IMU_angle < 150.0f)
 	gimbal.fold_pitch.imuPID.output = - gimbal.fold_pitch.imuPID.outer.output / 1000.0f - FOLD_PITCH_DIRECTION * FOLD_PITCH_MASS * MASS_G * FOLD_PITCH_R * arm_cos_f32(60.0f * PI / 180.0f);//当折叠pitch角度较大时，由于小pitch改变(懒得算重力补偿)，所以保持在60度时的重力补偿
+	
+	#ifndef Sentry_Mode
+	if(vision.control && gimbal.visionEnable){ //仅自瞄时叠加视觉规划前馈
+		gimbal.top_yaw.imuPID.output += vision_ff[0]*vision.top_yaw_vel - 1.9f*gimbal.top_yaw.gyro;
+		LIMIT(gimbal.top_yaw.imuPID.output,-30000.0f,30000.0f); //防止叠加后超出int16不回绕
+	}
+	float top_pitch_acc_ff = 0.0f;
+	if(vision.control && gimbal.visionEnable) //仅自瞄时叠加视觉规划前馈
+	{
+		gimbal.top_pitch.imuPID.outer.output += vision_ff[2]*vision.top_pitch_vel;
+		top_pitch_acc_ff = vision_ff[3]*vision.top_pitch_acc;
+	}
+	gimbal.top_pitch.imuPID.output = - gimbal.top_pitch.imuPID.output/1000.0f - TOP_PITCH_DIRECTION * TOP_PITCH_MASS * MASS_G * TOP_PITCH_R * arm_cos_f32(gimbal.top_pitch.angle * PI / 180.0f) - top_pitch_acc_ff; ////输出除一千让PID参数乘1000方便调参  同时加入前馈
+	#endif
 }
 
 

@@ -575,7 +575,9 @@ void Task_Gimbal_Callback()
 
 	// 计算顶pitch电机输出
 	// DEPID_CascadeCalc(&gimbal.pitch.imuPID, gimbal.pitch.targetAngle, gimbal.pitch.angle, gimbal.pitch.gyro);
+	LIMIT(gimbal.top_pitch.targetAngle, -55.0f, 55.0f);//因IMU解算问题，随pitch角增大，IMU的yaw解算出现分母趋于0靠向奇异点。同时gyro速度阻尼衰减。导致云台疯转。此处给pitch限幅
 	PID_SingleCalc(&gimbal.top_pitch.imuPID.outer,gimbal.top_pitch.targetAngle,gimbal.top_pitch.angle);
+	gimbal.top_pitch.imuPID.output = - gimbal.top_pitch.imuPID.output/1000.0f - TOP_PITCH_DIRECTION * TOP_PITCH_MASS * MASS_G * TOP_PITCH_R * arm_cos_f32(gimbal.top_pitch.angle * PI / 180.0f);
 
 	//此处不是outer.output 方便从纯力矩切换到mit速度模式 同时加入前馈
 	// Gimbal_Follow_IMU();
@@ -598,8 +600,10 @@ void Task_Gimbal_Callback()
 		gimbal.top_pitch.imuPID.outer.output += vision_ff[2]*vision.top_pitch_vel;
 		top_pitch_acc_ff = vision_ff[3]*vision.top_pitch_acc;
 	}
-	gimbal.top_pitch.imuPID.output = - gimbal.top_pitch.imuPID.output/1000.0f - TOP_PITCH_DIRECTION * TOP_PITCH_MASS * MASS_G * TOP_PITCH_R * arm_cos_f32(gimbal.top_pitch.angle * PI / 180.0f) - top_pitch_acc_ff; ////输出除一千让PID参数乘1000方便调参  同时加入前馈
+	gimbal.top_pitch.imuPID.output = gimbal.top_pitch.imuPID.output - top_pitch_acc_ff;
 	#endif
+	
+	
 }
 
 

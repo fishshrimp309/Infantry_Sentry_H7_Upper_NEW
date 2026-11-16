@@ -49,8 +49,8 @@ void Task_CANMotors_Callback()
 void Task_ClearError_Callback()
 {
     Motor_ClearErr(&hfdcan2,0x01,gimbal.base_yawMotor.para.state);
-    Motor_ClearErr(&hfdcan2,0x02,gimbal.fold_pitchMotor.para.state);
-    Motor_ClearErr(&hfdcan2,0x03,gimbal.top_pitchMotor.para.state);
+    Motor_ClearErr(&hfdcan2,0x03,gimbal.fold_pitchMotor.para.state);
+    Motor_ClearErr(&hfdcan2,0x02,gimbal.top_pitchMotor.para.state);
 }
 
 void OS_MotorCallback(void const * argument)

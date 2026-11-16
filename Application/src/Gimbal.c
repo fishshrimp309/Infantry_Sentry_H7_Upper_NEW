@@ -592,14 +592,16 @@ void Task_Gimbal_Callback()
 		gimbal.top_yaw.imuPID.output += vision_ff[0]*vision.top_yaw_vel - 1.9f*gimbal.top_yaw.gyro;
 		LIMIT(gimbal.top_yaw.imuPID.output,-30000.0f,30000.0f); //防止叠加后超出int16不回绕
 	}
+	#endif
 	float top_pitch_acc_ff = 0.0f;
+	#if !Sentry_Mode
 	if(vision.control && gimbal.visionEnable) //仅自瞄时叠加视觉规划前馈
 	{
 		gimbal.top_pitch.imuPID.outer.output += vision_ff[2]*vision.top_pitch_vel;
 		top_pitch_acc_ff = vision_ff[3]*vision.top_pitch_acc;
 	}
-	gimbal.top_pitch.imuPID.output = - gimbal.top_pitch.imuPID.output/1000.0f - TOP_PITCH_DIRECTION * TOP_PITCH_MASS * MASS_G * TOP_PITCH_R * arm_cos_f32(gimbal.top_pitch.angle * PI / 180.0f) - top_pitch_acc_ff; ////输出除一千让PID参数乘1000方便调参  同时加入前馈
 	#endif
+	gimbal.top_pitch.imuPID.output = - gimbal.top_pitch.imuPID.output/1000.0f - TOP_PITCH_DIRECTION * TOP_PITCH_MASS * MASS_G * TOP_PITCH_R * arm_cos_f32(gimbal.top_pitch.angle * PI / 180.0f) - top_pitch_acc_ff; ////输出除一千让PID参数乘1000方便调参  同时加入前馈
 }
 
 

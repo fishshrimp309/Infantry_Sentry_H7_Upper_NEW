@@ -19,6 +19,15 @@ typedef enum{
 	Chassis_AI,
 }Chassis_Pattern_e;
 
+// 三角函数小陀螺
+typedef struct
+{
+	float spin_cos_period;//完整波形周期 s
+	float spin_cos_phase;//当前相位 rad
+	float spin_cos_ratio;//最低速占峰值的比例 0~1
+	float spin_cos_shape;//当前波形值[0,1]，切回底盘跟随时冻结用
+} Spin_cos_t;
+
 typedef struct _Chassis
 {
 	// 底盘尺寸信息
@@ -73,6 +82,7 @@ typedef struct _Chassis
 		float nowAngle;		// 此时云台的编码器换算为°值
 		Chassis_Mode_e mode;		// 底盘模式 小陀螺或者底盘跟随
 		float ratio;				// 旋转速度系数 占最大速度的多少
+		Spin_cos_t spin_cos;			//三角函数小陀螺
 	} rotate;
 	struct
 	{

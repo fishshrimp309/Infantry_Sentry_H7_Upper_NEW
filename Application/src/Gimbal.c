@@ -24,7 +24,7 @@
 Gimbal_t gimbal;
 float visionFindAver;
 int16_t yaw_delta_angle;
-float vision_ff[4] = {0.0f, 0.0f, -0.3f, 0.00767642}; //视觉前馈系数 [0]yaw速度 [1]yaw加速度 [2]pitch速度 [3]pitch加速度 (0=不生效)
+float vision_ff[4] = {600.0f, 0.07f, -0.5f, 0.0085}; //视觉前馈系数 [0]yaw速度 [1]yaw加速度 [2]pitch速度 [3]pitch加速度 (0=不生效)
 
 void Gimbal_InitPID(void);
 
@@ -41,7 +41,7 @@ void Gimbal_Init()
 	gimbal.fold_pitch.pitchMax = 95;
 	gimbal.fold_pitch.pitchMin = -0.5;
 
-	gimbal.fold_pitch.initAngle = 0;
+	gimbal.fold_pitch.initAngle = 95;
 	gimbal.fold_pitch.targetAngle = gimbal.fold_pitch.initAngle;
 
 	gimbal.base_yaw.initAngle = 0; // 陀螺仪yaw开机角度   *0表示yaw不动
@@ -587,9 +587,9 @@ void Task_Gimbal_Callback()
 	if(gimbal.fold_pitch.IMU_angle > 60.0f && gimbal.fold_pitch.IMU_angle < 150.0f)
 	gimbal.fold_pitch.imuPID.output = - gimbal.fold_pitch.imuPID.outer.output / 1000.0f - FOLD_PITCH_DIRECTION * FOLD_PITCH_MASS * MASS_G * FOLD_PITCH_R * arm_cos_f32(60.0f * PI / 180.0f);//当折叠pitch角度较大时，由于小pitch改变(懒得算重力补偿)，所以保持在60度时的重力补偿
 	
-	#ifndef Sentry_Mode
+	#if !Sentry_Mode
 	if(vision.control && gimbal.visionEnable){ //仅自瞄时叠加视觉规划前馈
-		gimbal.top_yaw.imuPID.output += vision_ff[0]*vision.top_yaw_vel - 1.9f*gimbal.top_yaw.gyro;
+		gimbal.top_yaw.imuPID.output += (vision_ff[0]*vision.top_yaw_vel + vision_ff[1]*vision.top_yaw_acc*3.333f*819.2f);
 		LIMIT(gimbal.top_yaw.imuPID.output,-30000.0f,30000.0f); //防止叠加后超出int16不回绕
 	}
 	#endif

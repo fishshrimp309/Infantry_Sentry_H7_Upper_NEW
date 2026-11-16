@@ -12,6 +12,7 @@
 #include <stdint.h>
 #include "USER_Detcet.h"
 
+#define SPIN_COS_PERIOD_S 0.002f //控制周期，用于计算osdelay(2)每个周期相位增量
 
 int8_t diagonal_enable = 0;
 float vx,vy,vw = 0;  //AI传来的旋转速度
@@ -41,7 +42,12 @@ void Chassis_Init()
 	chassis.rotate.InitAngle = INIT_YAW_ANGLE; 
 	if (chassis.rotate.InitAngle > 360)
 		chassis.rotate.InitAngle -= 360;
-	chassis.rotate.InitpitchAngle = 1290; 
+	chassis.rotate.InitpitchAngle = 1290;
+
+	chassis.rotate.spin_cos.spin_cos_period = 0.2f;
+	chassis.rotate.spin_cos.spin_cos_phase = 0.0f;
+	chassis.rotate.spin_cos.spin_cos_ratio = 0.8f;
+	chassis.rotate.spin_cos.spin_cos_shape = 1.0f;
 
 	// 斜坡函数初始化
 	Slope_Init(&chassis.move.xSlope, 40, 0);
@@ -301,6 +307,25 @@ void Chassis_UpdateMove(void)
 		}
 }
 
+//三角函数小陀螺
+static void Chassis_SpinCosUpdate(void)
+{
+	Spin_cos_t *spin = &chassis.rotate.spin_cos;
+	if (spin->spin_cos_period <= 0.0f)
+		return;
+	spin->spin_cos_phase += 2.0f * PI * SPIN_COS_PERIOD_S / spin->spin_cos_period;
+	if (spin->spin_cos_phase >= 2.0f * PI)
+		spin->spin_cos_phase -= 2.0f * PI;
+	spin->spin_cos_shape = 0.5f * (1.0f - cosf(spin->spin_cos_phase));
+}
+
+//把最大角速度按波形收缩到 [ratio,1] 倍，全程单向
+static float Chassis_SpinCosOut(float vw)
+{
+	float r = chassis.rotate.spin_cos.spin_cos_ratio;
+	return fabsf(vw) * (r + (1.0f - r) * chassis.rotate.spin_cos.spin_cos_shape);
+}
+
 /*旋转状态机*/
 static void Chassis_HandleFollow(void) //底盘跟随模式
 {
@@ -333,7 +358,7 @@ static void Chassis_HandleFollow(void) //底盘跟随模式
 					chassis.rotate.pid.integral = 0.0f;
 			}
 			PID_SingleCalc(&chassis.rotate.pid, 0, -pid_angle);
-			chassis.move.vw = chassis.rotate.pid.output + chassis.move.spinSlope.value;
+			chassis.move.vw = chassis.rotate.pid.output + Chassis_SpinCosOut(chassis.move.spinSlope.value);
 			LIMIT(chassis.move.vw,-chassis.move.maxVw,chassis.move.maxVw);
 		}
 		else
@@ -366,7 +391,7 @@ static void Chassis_HandleFollow(void) //底盘跟随模式
 					chassis.rotate.pid.integral = 0.0f;
 			}
 			PID_SingleCalc(&chassis.rotate.pid, 0, -pid_angle);
-			chassis.move.vw = chassis.rotate.pid.output + chassis.move.spinSlope.value;
+			chassis.move.vw = chassis.rotate.pid.output + Chassis_SpinCosOut(chassis.move.spinSlope.value);
 			LIMIT(chassis.move.vw,-chassis.move.maxVw,chassis.move.maxVw);
 		}
 }
@@ -384,18 +409,20 @@ static void Chassis_HandleSpin(void) //小陀螺模式
     {
         chassis.rotate.ratio = 0.5f;
     }
+    Chassis_SpinCosUpdate();
     Slope_SetTarget(&chassis.move.spinSlope,chassis.move.maxVw * chassis.rotate.ratio);
-	chassis.move.vw =chassis.move.spinSlope.value;
+	chassis.move.vw = Chassis_SpinCosOut(chassis.move.spinSlope.value);
 }
 
 void Chassis_UpdateSlope()
 {
+	float rotateRatio = (chassis.info.wheelbase + chassis.info.wheeltrack) / 4.0f;
 	Slope_NextVal(&chassis.move.xSlope);
 	Slope_NextVal(&chassis.move.ySlope);
 	Slope_NextVal(&chassis.move.spinSlope);
 	chassis.move.maxVx = SET_WHEELSPEED_MAX / 60.0f / 14.88 * 2 * PI * chassis.info.wheelRadius;
 	chassis.move.maxVy = chassis.move.maxVx;//60是rpm转换成转速 14.88是减速箱减速比 2PI*R是轮子周长
-	chassis.move.maxVw = SET_WHEELSPEED_MAX / chassis.info.R / 60.0f / 14.88 * 2.0f * PI * chassis.info.wheelRadius;
+	chassis.move.maxVw = SET_WHEELSPEED_MAX / rotateRatio / 60.0f / 14.88 * 2.0f * PI * chassis.info.wheelRadius * 1.0f / 1.414f;
 }
 
 

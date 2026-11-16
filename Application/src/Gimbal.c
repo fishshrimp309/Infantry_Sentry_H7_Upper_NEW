@@ -46,6 +46,7 @@ void Gimbal_Init()
 
 	gimbal.base_yaw.initAngle = 0; // 陀螺仪yaw开机角度   *0表示yaw不动
 	gimbal.base_yaw.targetAngle = gimbal.base_yaw.initAngle;
+	gimbal.fold_flag = 1;
 
 	gimbal.top_yaw.initAngle = 0;
 	gimbal.top_yaw.targetAngle = gimbal.top_yaw.initAngle;
